@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+    /* Taneira Luxury Palette */
+    --color-brand-gold: #c0a875;
+    --color-brand-dark: #0a0a0a;
+
+    /* Custom Fonts */
+    --font-serif: "Playfair Display", serif;
+    --font-sans: "Inter", system-ui, sans-serif;
+}
+
+/* Base Body Styles */
+@layer base {
+    body {
+        @apply bg-black text-zinc-100 antialiased;
+        margin: 0;
+        overflow: hidden; /* Prevents unwanted scrolling on the dashboard */
+    }
+}
+
+/* Custom Scrollbar for a premium feel */
+::-webkit-scrollbar {
+    width: 5px;
+}
+::-webkit-scrollbar-track {
+    background: #000;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
