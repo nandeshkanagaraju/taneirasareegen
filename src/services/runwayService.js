@@ -154,12 +154,21 @@ const resizeAndConvertImage = (url) => {
 /**
  * @param {string} inputImageBase64
  * @param {string} garmentType - Must be one of the keys in PROMPT_MAP (e.g., 'saree_regional', 'kurta_set', 'blouse')
+ * @param {string} secondaryImageBase64 - Optional secondary image (e.g., Blouse for Saree)
  */
-export async function generateSareeModel(inputImageBase64, garmentType = 'saree_regional') {
+export async function generateSareeModel(inputImageBase64, garmentType = 'saree_regional', secondaryImageBase64 = null) {
     if (!API_KEY) throw new Error("API Key missing. Check .env");
 
     try {
         const processedImage = await resizeAndConvertImage(inputImageBase64);
+
+        let referenceImages = [{ uri: processedImage }];
+
+        // Process secondary image if provided (e.g. Blouse for Saree)
+        if (secondaryImageBase64) {
+            const processedSecondary = await resizeAndConvertImage(secondaryImageBase64);
+            referenceImages.push({ uri: processedSecondary });
+        }
 
         // --- PRECISE PROMPT LOGIC ---
         // Selects the specific prompt based on garmentType, falling back to 'default' if not found.
@@ -177,7 +186,7 @@ export async function generateSareeModel(inputImageBase64, garmentType = 'saree_
             body: JSON.stringify({
                 model: "gemini_2.5_flash",
                 promptText: prompt,
-                referenceImages: [{ uri: processedImage }],
+                referenceImages: referenceImages,
                 ratio: "768:1344", // Best for full-length shots
                 seed: Math.floor(Math.random() * 1000000)
             })

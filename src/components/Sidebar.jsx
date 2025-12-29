@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // Added Zap and Loader2 to the imports
 import { Upload, Sparkles, ChevronDown, Maximize2, CheckCircle2, Zap, Loader2 } from 'lucide-react';
 
-const Sidebar = ({ onUpload, onGenerate, onUpscale, hasImage, hasOutput, isUpscaled, loading }) => {
+const Sidebar = ({ onUpload, onGenerate, onUpscale, hasImage, hasOutput, isUpscaled, loading, hasBlouse }) => {
     // Initial state changed to 'saree_regional' to match the first category ID
     const [selectedType, setSelectedType] = useState('saree_regional');
 
@@ -26,21 +26,9 @@ const Sidebar = ({ onUpload, onGenerate, onUpscale, hasImage, hasOutput, isUpsca
             </div>
 
             <div className="space-y-8 flex-1">
-                {/* Step 1: Upload */}
+                {/* Step 1: Dress Type */}
                 <div className="space-y-2">
-                    <label className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase">Step 1: Upload Source</label>
-                    <label className="flex flex-col items-center justify-center w-full h-28 rounded-lg border border-zinc-800 bg-zinc-900/20 hover:border-amber-500/40 cursor-pointer transition-all group">
-                        <Upload className="text-zinc-600 group-hover:text-amber-500 mb-2" size={18} />
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">
-                            {hasImage ? 'Change Image' : 'Choose File'}
-                        </span>
-                        <input type="file" className="hidden" onChange={onUpload} />
-                    </label>
-                </div>
-
-                {/* Step 2: Category */}
-                <div className="space-y-2">
-                    <label className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase">Step 2: Dress Type</label>
+                    <label className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase">Step 1: Dress Type</label>
                     <div className="relative">
                         <select
                             value={selectedType}
@@ -53,13 +41,48 @@ const Sidebar = ({ onUpload, onGenerate, onUpscale, hasImage, hasOutput, isUpsca
                     </div>
                 </div>
 
+                {/* Step 2: Upload */}
+                <div className="space-y-2">
+                    <label className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase">Step 2: Upload Source</label>
+
+                    {(selectedType.startsWith('saree') || selectedType === 'draped_saree') ? (
+                        <div className="space-y-2">
+                            {/* Saree Upload */}
+                            <label className="flex flex-col items-center justify-center w-full h-24 rounded-lg border border-zinc-800 bg-zinc-900/20 hover:border-amber-500/40 cursor-pointer transition-all group">
+                                <Upload className="text-zinc-600 group-hover:text-amber-500 mb-1" size={16} />
+                                <span className="text-[9px] font-bold text-zinc-500 uppercase">
+                                    {hasImage ? 'Change Saree' : 'Upload Saree'}
+                                </span>
+                                <input type="file" className="hidden" onChange={(e) => onUpload(e, 'primary')} />
+                            </label>
+
+                            {/* Blouse Upload */}
+                            <label className="flex flex-col items-center justify-center w-full h-24 rounded-lg border border-zinc-800 bg-zinc-900/20 hover:border-amber-500/40 cursor-pointer transition-all group">
+                                <Upload className="text-zinc-600 group-hover:text-amber-500 mb-1" size={16} />
+                                <span className="text-[9px] font-bold text-zinc-500 uppercase">
+                                    {hasBlouse ? 'Change Blouse' : 'Upload Blouse'}
+                                </span>
+                                <input type="file" className="hidden" onChange={(e) => onUpload(e, 'secondary')} />
+                            </label>
+                        </div>
+                    ) : (
+                        <label className="flex flex-col items-center justify-center w-full h-28 rounded-lg border border-zinc-800 bg-zinc-900/20 hover:border-amber-500/40 cursor-pointer transition-all group">
+                            <Upload className="text-zinc-600 group-hover:text-amber-500 mb-2" size={18} />
+                            <span className="text-[9px] font-bold text-zinc-500 uppercase">
+                                {hasImage ? 'Change Image' : 'Choose File'}
+                            </span>
+                            <input type="file" className="hidden" onChange={(e) => onUpload(e, 'primary')} />
+                        </label>
+                    )}
+                </div>
+
                 {/* Step 3: Actions */}
                 <div className="space-y-3 pt-6 border-t border-zinc-900">
                     <button
                         onClick={() => onGenerate(selectedType)}
-                        disabled={!hasImage || loading}
+                        disabled={!hasImage || ((selectedType.startsWith('saree') || selectedType === 'draped_saree') && !hasBlouse) || loading}
                         className={`w-full py-3.5 rounded-lg font-bold text-[10px] tracking-[0.2em] uppercase flex items-center justify-center gap-2 transition-all
-                        ${!hasImage || loading ? 'bg-zinc-900 text-zinc-700' : 'bg-amber-600 text-black hover:bg-amber-500 shadow-xl'}`}
+                        ${(!hasImage || ((selectedType.startsWith('saree') || selectedType === 'draped_saree') && !hasBlouse) || loading) ? 'bg-zinc-900 text-zinc-700' : 'bg-amber-600 text-black hover:bg-amber-500 shadow-xl'}`}
                     >
                         {loading && !isUpscaled ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
                         Generate Replica
@@ -72,8 +95,8 @@ const Sidebar = ({ onUpload, onGenerate, onUpscale, hasImage, hasOutput, isUpsca
                             disabled={loading || isUpscaled}
                             className={`w-full py-3.5 rounded-lg font-bold text-[10px] tracking-[0.2em] uppercase flex items-center justify-center gap-2 border transition-all
                             ${isUpscaled
-                                ? 'border-blue-900 bg-blue-900/20 text-blue-400'
-                                : 'border-blue-600/30 text-blue-500 hover:bg-blue-600/10 active:scale-95'}`}
+                                    ? 'border-blue-900 bg-blue-900/20 text-blue-400'
+                                    : 'border-blue-600/30 text-blue-500 hover:bg-blue-600/10 active:scale-95'}`}
                         >
                             {loading && isUpscaled ? (
                                 <Loader2 size={14} className="animate-spin" />
