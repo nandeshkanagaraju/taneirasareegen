@@ -6,20 +6,28 @@ const API_KEY = import.meta.env.VITE_RUNWAY_API_KEY;
 
 const PROMPT_MAP = {
     'saree_gen': `
-    GOAL: Saree Reconstruction: Pixel-Perfect Texture Mapping.
-    STRICT: ZERO HALLUCINATION. Map textures EXACTLY. NO invention of patterns, colors, or borders. Output must be an exact replica of input fabrics. Preserve exact fabric sheen (silk/zari).
+    GOAL: Photorealistic saree generation with ZERO hallucination using exact texture transfer.
 
-    INPUT MAPS:
-    - Texture 1 (Body): Saree pleats and lower wrap.
-    - Texture 2 (Pallu): Shoulder drape.
-    - Texture 3 (Blouse): Fitted blouse.
+INPUT TEXTURES:
+1) Saree Body texture (main fabric + pleats)
+2) Pallu texture (shoulder drape only)
+3) Blouse texture (fitted blouse)
 
-    COMPOSITION: Apply Texture 1 to Body, Texture 2 to Pallu, Texture 3 to Blouse. Body/Pallu transition must be seamless.
+STRICT RULES:
+• Pixel-accurate texture transfer only. NO invention, blending, recoloring, pattern change, or enhancement.
+• Preserve original weave, borders, motifs, sheen, folds, and fabric physics exactly as provided.
+• This is texture inpainting, NOT creative generation.
 
-    AESTHETICS:
-    - Drape: Traditional Nivi.
-    - Model: High-fashion Indian.
-    - Output: 8K, hyper-photorealistic.
+MAPPING:
+• Saree body → Texture 1
+• Pallu → Texture 2 (seamless transition, same fabric continuity)
+• Blouse → Texture 3
+
+STYLE:
+Traditional Indian Nivi drape on a professional Indian female model.
+Studio setup, clean editorial look.
+Plain white background, neutral high-key lighting.
+Ultra-realistic, fashion photography quality.
 `,
     'kurta_set': `
         TASK: High-Fidelity Kurta Set Virtual Try-On.
