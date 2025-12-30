@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 // Added Zap and Loader2 to the imports
 import { Upload, Sparkles, ChevronDown, Maximize2, CheckCircle2, Zap, Loader2 } from 'lucide-react';
 
-const Sidebar = ({ onUpload, onGenerate, onUpscale, hasImage, hasOutput, isUpscaled, loading, hasBlouse }) => {
+const Sidebar = ({ onUpload, onGenerate, onUpscale, hasImage, hasOutput, isUpscaled, loading, hasBlouse, hasPallu }) => {
     // Initial state changed to 'saree_regional' to match the first category ID
-    const [selectedType, setSelectedType] = useState('saree_regional');
+    const [selectedType, setSelectedType] = useState('saree_gen');
 
     const categories = [
-        { id: 'saree_regional', name: 'Regional Saree (Silk/Banarasi)' },
-        { id: 'saree_cotton', name: 'Cotton / Daily Saree' },
-        { id: 'draped_saree', name: 'Ready-to-wear Draped Saree' },
+        { id: 'saree_gen', name: 'Saree' },
         { id: 'kurta_set', name: 'Kurta Set with Dupatta' },
         { id: 'kurta_set_no_dupatta', name: 'Kurta Set without Dupatta' },
         { id: 'short_top', name: 'Short Top / Tunic' },
@@ -42,27 +40,37 @@ const Sidebar = ({ onUpload, onGenerate, onUpscale, hasImage, hasOutput, isUpsca
                 </div>
 
                 {/* Step 2: Upload */}
+                {/* Step 2: Upload */}
                 <div className="space-y-2">
                     <label className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase">Step 2: Upload Source</label>
 
-                    {(selectedType.startsWith('saree') || selectedType === 'draped_saree') ? (
+                    {selectedType === 'saree_gen' ? (
                         <div className="space-y-2">
-                            {/* Saree Upload */}
-                            <label className="flex flex-col items-center justify-center w-full h-24 rounded-lg border border-zinc-800 bg-zinc-900/20 hover:border-amber-500/40 cursor-pointer transition-all group">
+                            {/* 1. Body Upload */}
+                            <label className="flex flex-col items-center justify-center w-full h-20 rounded-lg border border-zinc-800 bg-zinc-900/20 hover:border-amber-500/40 cursor-pointer transition-all group">
                                 <Upload className="text-zinc-600 group-hover:text-amber-500 mb-1" size={16} />
                                 <span className="text-[9px] font-bold text-zinc-500 uppercase">
-                                    {hasImage ? 'Change Saree' : 'Upload Saree'}
+                                    {hasImage ? 'Change Saree Body' : '1. Upload Body'}
                                 </span>
                                 <input type="file" className="hidden" onChange={(e) => onUpload(e, 'primary')} />
                             </label>
 
-                            {/* Blouse Upload */}
-                            <label className="flex flex-col items-center justify-center w-full h-24 rounded-lg border border-zinc-800 bg-zinc-900/20 hover:border-amber-500/40 cursor-pointer transition-all group">
+                            {/* 2. Pallu Upload */}
+                            <label className="flex flex-col items-center justify-center w-full h-20 rounded-lg border border-zinc-800 bg-zinc-900/20 hover:border-amber-500/40 cursor-pointer transition-all group">
                                 <Upload className="text-zinc-600 group-hover:text-amber-500 mb-1" size={16} />
                                 <span className="text-[9px] font-bold text-zinc-500 uppercase">
-                                    {hasBlouse ? 'Change Blouse' : 'Upload Blouse'}
+                                    {hasPallu ? 'Change Pallu' : '2. Upload Pallu'}
                                 </span>
                                 <input type="file" className="hidden" onChange={(e) => onUpload(e, 'secondary')} />
+                            </label>
+
+                            {/* 3. Blouse Upload */}
+                            <label className="flex flex-col items-center justify-center w-full h-20 rounded-lg border border-zinc-800 bg-zinc-900/20 hover:border-amber-500/40 cursor-pointer transition-all group">
+                                <Upload className="text-zinc-600 group-hover:text-amber-500 mb-1" size={16} />
+                                <span className="text-[9px] font-bold text-zinc-500 uppercase">
+                                    {hasBlouse ? 'Change Blouse' : '3. Upload Blouse'}
+                                </span>
+                                <input type="file" className="hidden" onChange={(e) => onUpload(e, 'tertiary')} />
                             </label>
                         </div>
                     ) : (
@@ -80,9 +88,14 @@ const Sidebar = ({ onUpload, onGenerate, onUpscale, hasImage, hasOutput, isUpsca
                 <div className="space-y-3 pt-6 border-t border-zinc-900">
                     <button
                         onClick={() => onGenerate(selectedType)}
-                        disabled={!hasImage || ((selectedType.startsWith('saree') || selectedType === 'draped_saree') && !hasBlouse) || loading}
+                        disabled={!hasImage ||
+                            (selectedType === 'saree_gen' && (!hasPallu || !hasBlouse)) ||
+                            loading}
                         className={`w-full py-3.5 rounded-lg font-bold text-[10px] tracking-[0.2em] uppercase flex items-center justify-center gap-2 transition-all
-                        ${(!hasImage || ((selectedType.startsWith('saree') || selectedType === 'draped_saree') && !hasBlouse) || loading) ? 'bg-zinc-900 text-zinc-700' : 'bg-amber-600 text-black hover:bg-amber-500 shadow-xl'}`}
+                        ${(!hasImage ||
+                                (selectedType === 'saree_gen' && (!hasPallu || !hasBlouse)) ||
+                                loading)
+                                ? 'bg-zinc-900 text-zinc-700' : 'bg-amber-600 text-black hover:bg-amber-500 shadow-xl'}`}
                     >
                         {loading && !isUpscaled ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
                         Generate Replica

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Loader2, Sparkles, Box, CheckCircle } from 'lucide-react';
 
-const Canvas = ({ inputImage, outputImage, upscaledImage, loading, isUpscaling }) => {
+const Canvas = ({ inputImage, palluImage, blouseImage, outputImage, upscaledImage, loading, isUpscaling }) => {
     return (
         <div className="flex h-full w-full gap-4 items-stretch">
 
@@ -9,13 +9,41 @@ const Canvas = ({ inputImage, outputImage, upscaledImage, loading, isUpscaling }
             <div className="flex-1 flex flex-col min-w-0 bg-zinc-900/20 border border-zinc-800 rounded-xl overflow-hidden shadow-lg">
                 <div className="px-4 py-2 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                     <span className="text-[9px] font-bold tracking-widest text-zinc-500 uppercase">Input Source</span>
+                    <span className="text-[9px] font-bold tracking-widest text-zinc-600 uppercase">{[inputImage, palluImage, blouseImage].filter(Boolean).length} / 3</span>
                 </div>
-                <div className="flex-1 relative flex items-center justify-center p-2 bg-[#050505]">
-                    {inputImage ? (
-                        <img src={inputImage} className="max-w-full max-h-full object-contain" alt="Input" />
-                    ) : (
-                        <p className="text-[8px] text-zinc-700 tracking-[0.4em] uppercase font-serif italic">No Source</p>
-                    )}
+                <div className="flex-1 relative p-2 bg-[#050505] overflow-auto">
+                    {/* Grid Layout for Multiple Inputs */}
+                    <div className="grid grid-rows-3 gap-2 h-full">
+                        {/* Row 1: Body */}
+                        <div className="relative border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/30">
+                            {inputImage ? (
+                                <img src={inputImage} className="w-full h-full object-contain" alt="Body" />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-[8px] text-zinc-700 uppercase tracking-widest">No Body</div>
+                            )}
+                            <div className="absolute bottom-1 right-2 text-[8px] font-bold bg-black/50 px-1 rounded text-white/50">BODY</div>
+                        </div>
+
+                        {/* Row 2: Pallu */}
+                        <div className="relative border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/30">
+                            {palluImage ? (
+                                <img src={palluImage} className="w-full h-full object-contain" alt="Pallu" />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-[8px] text-zinc-700 uppercase tracking-widest">No Pallu</div>
+                            )}
+                            <div className="absolute bottom-1 right-2 text-[8px] font-bold bg-black/50 px-1 rounded text-white/50">PALLU</div>
+                        </div>
+
+                        {/* Row 3: Blouse */}
+                        <div className="relative border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/30">
+                            {blouseImage ? (
+                                <img src={blouseImage} className="w-full h-full object-contain" alt="Blouse" />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-[8px] text-zinc-700 uppercase tracking-widest">No Blouse</div>
+                            )}
+                            <div className="absolute bottom-1 right-2 text-[8px] font-bold bg-black/50 px-1 rounded text-white/50">BLOUSE</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

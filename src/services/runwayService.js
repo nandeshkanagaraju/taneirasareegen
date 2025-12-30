@@ -5,42 +5,22 @@ const RUNWAY_VERSION = "2024-11-06";
 const API_KEY = import.meta.env.VITE_RUNWAY_API_KEY;
 
 const PROMPT_MAP = {
-    'saree_regional': `
-        TASK: High-Fidelity Regional Saree (Banarasi/Silk) Virtual Try-On.
-        INPUT: Reference image contains a Saree and Blouse on a mannequin.
-        OUTPUT: Professional Indian Woman model wearing the EXACT SAME garment.
+    'saree_gen': `
+    GOAL: Saree Reconstruction: Pixel-Perfect Texture Mapping.
+    STRICT: ZERO HALLUCINATION. Map textures EXACTLY. NO invention of patterns, colors, or borders. Output must be an exact replica of input fabrics. Preserve exact fabric sheen (silk/zari).
 
-        STRICT REPLICATION RULES:
-        1. TEXTURE MAPPING: Transfer the identical heavy silk fabric texture, intricate border embroidery, and pallu patterns (e.g., Banarasi brocade, Kanjivaram motifs) from the reference.
-        2. BLOUSE LOCK: The blouse design, sleeve length, and neck embroidery must be 100% identical to the reference.
-        3. DRAPING: Replicate the exact traditional drape style (e.g., Nivi, Bengali, or specific regional style) including the shoulder pleats and waist folds.
-        4. MODEL: Replace mannequin with a high-fashion Indian model. Keep skin tone realistic.
-        5. QUALITY: Professional studio lighting, 8k, photorealistic, sharp details on gold zari work and heavy silk sheen.
-    `,
-    'saree_cotton': `
-        TASK: High-Fidelity Cotton/Daily Saree Virtual Try-On.
-        INPUT: Reference image contains a Cotton Saree and Blouse on a mannequin.
-        OUTPUT: Professional Indian Woman model wearing the EXACT SAME garment.
+    INPUT MAPS:
+    - Texture 1 (Body): Saree pleats and lower wrap.
+    - Texture 2 (Pallu): Shoulder drape.
+    - Texture 3 (Blouse): Fitted blouse.
 
-        STRICT REPLICATION RULES:
-        1. TEXTURE MAPPING: Transfer the identical lightweight cotton or linen fabric texture, subtle prints, and simple border patterns from the reference. Ensure a soft, breathable look.
-        2. BLOUSE LOCK: The blouse design, sleeve length, and neck must be 100% identical to the reference.
-        3. DRAPING: Replicate a neat, everyday drape style, ensuring the fabric falls naturally and lightly. The pleats should be crisp but not stiff.
-        4. MODEL: Replace mannequin with a natural-looking Indian model, suitable for a daily/casual setting.
-        5. QUALITY: Bright, natural daylight studio lighting, 8k, photorealistic, emphasizing the texture and comfort of the cotton weave.
-    `,
-    'draped_saree': `
-        TASK: High-Fidelity Ready-to-Wear Draped Saree Virtual Try-On.
-        INPUT: Reference image contains a Pre-Stitched Draped Saree on a mannequin.
-        OUTPUT: Professional Indian Woman model wearing the EXACT SAME garment.
+    COMPOSITION: Apply Texture 1 to Body, Texture 2 to Pallu, Texture 3 to Blouse. Body/Pallu transition must be seamless.
 
-        STRICT REPLICATION RULES:
-        1. TEXTURE MAPPING: Transfer the identical fabric texture, embellishments, and pre-stitched pleat structure from the reference.
-        2. BLOUSE LOCK: The attached or accompanying blouse design, fit, and detailing must be 100% identical to the reference.
-        3. DRAPING: Replicate the modern, structured silhouette and the perfect, fixed drape of the ready-to-wear garment. Focus on the clean lines and fit.
-        4. MODEL: Replace mannequin with a high-fashion Indian model with a slim, defined silhouette.
-        5. QUALITY: Contemporary studio lighting, 8k, photorealistic, emphasizing the garment's structure and modern styling.
-    `,
+    AESTHETICS:
+    - Drape: Traditional Nivi.
+    - Model: High-fashion Indian.
+    - Output: 8K, hyper-photorealistic.
+`,
     'kurta_set': `
         TASK: High-Fidelity Kurta Set Virtual Try-On.
         INPUT: Reference image contains a Kurta, Bottom (Pants/Palazzo), and Dupatta on a mannequin.
@@ -153,10 +133,11 @@ const resizeAndConvertImage = (url) => {
 
 /**
  * @param {string} inputImageBase64
- * @param {string} garmentType - Must be one of the keys in PROMPT_MAP (e.g., 'saree_regional', 'kurta_set', 'blouse')
- * @param {string} secondaryImageBase64 - Optional secondary image (e.g., Blouse for Saree)
+ * @param {string} garmentType
+ * @param {string} palluImageBase64 - Optional Pallu (Image 2)
+ * @param {string} blouseImageBase64 - Optional Blouse (Image 3)
  */
-export async function generateSareeModel(inputImageBase64, garmentType = 'saree_regional', secondaryImageBase64 = null) {
+export async function generateSareeModel(inputImageBase64, garmentType = 'saree_gen', palluImageBase64 = null, blouseImageBase64 = null) {
     if (!API_KEY) throw new Error("API Key missing. Check .env");
 
     try {
@@ -164,10 +145,16 @@ export async function generateSareeModel(inputImageBase64, garmentType = 'saree_
 
         let referenceImages = [{ uri: processedImage }];
 
-        // Process secondary image if provided (e.g. Blouse for Saree)
-        if (secondaryImageBase64) {
-            const processedSecondary = await resizeAndConvertImage(secondaryImageBase64);
-            referenceImages.push({ uri: processedSecondary });
+        // Process Pallu (Image 2)
+        if (palluImageBase64) {
+            const processedPallu = await resizeAndConvertImage(palluImageBase64);
+            referenceImages.push({ uri: processedPallu });
+        }
+
+        // Process Blouse (Image 3)
+        if (blouseImageBase64) {
+            const processedBlouse = await resizeAndConvertImage(blouseImageBase64);
+            referenceImages.push({ uri: processedBlouse });
         }
 
         // --- PRECISE PROMPT LOGIC ---
@@ -187,14 +174,15 @@ export async function generateSareeModel(inputImageBase64, garmentType = 'saree_
                 model: "gemini_2.5_flash",
                 promptText: prompt,
                 referenceImages: referenceImages,
-                ratio: "768:1344", // Best for full-length shots
+                ratio: "768:1344",
                 seed: Math.floor(Math.random() * 1000000)
             })
         });
 
         if (!response.ok) {
             const err = await response.json();
-            throw new Error(`API Error: ${err.message || 'Validation Failed'}`);
+            console.error("Runway API Error Details:", JSON.stringify(err, null, 2));
+            throw new Error(`API Error: ${err.message || JSON.stringify(err) || 'Validation Failed'}`);
         }
 
         const data = await response.json();

@@ -6,7 +6,8 @@ import { generateSareeModel, upscaleImage } from './services/runwayService';
 
 function App() {
     const [inputImage, setInputImage] = useState(null);
-    const [blouseImage, setBlouseImage] = useState(null); // New State for Blouse
+    const [blouseImage, setBlouseImage] = useState(null);
+    const [palluImage, setPalluImage] = useState(null); // New State for Pallu
     const [outputImage, setOutputImage] = useState(null);
     const [upscaledImage, setUpscaledImage] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -20,7 +21,9 @@ function App() {
                 if (type === 'primary') {
                     setInputImage(reader.result);
                 } else if (type === 'secondary') {
-                    setBlouseImage(reader.result);
+                    setPalluImage(reader.result); // Changed: Secondary is now Pallu (Image 2)
+                } else if (type === 'tertiary') {
+                    setBlouseImage(reader.result); // New: Tertiary is Blouse (Image 3)
                 }
 
                 // Only reset output if primary image changes? Or both?
@@ -36,17 +39,19 @@ function App() {
     const handleGenerate = async (dressType) => {
         if (!inputImage) return;
 
-        // Validation for dual upload types
-        if ((dressType.startsWith('saree') || dressType === 'draped_saree') && !blouseImage) {
-            alert("Please upload both Saree and Blouse images.");
-            return;
+        // Validation for triple upload types (Consolidated Saree)
+        if (dressType === 'saree_gen') {
+            if (!blouseImage || !palluImage) {
+                alert("Please upload Saree Body, Pallu, and Blouse images.");
+                return;
+            }
         }
 
         setLoading(true);
         setUpscaledImage(null);
         try {
-            // Pass blouseImage as secondary if available
-            const result = await generateSareeModel(inputImage, dressType, blouseImage);
+            // Pass palluImage and blouseImage
+            const result = await generateSareeModel(inputImage, dressType, palluImage, blouseImage);
             setOutputImage(result);
         } catch (err) {
             alert("Error: " + err.message);
@@ -75,6 +80,7 @@ function App() {
                 onGenerate={handleGenerate}
                 onUpscale={handleUpscale}
                 hasImage={!!inputImage}
+                hasPallu={!!palluImage}
                 hasBlouse={!!blouseImage}
                 hasOutput={!!outputImage}
                 hasUpscale={!!upscaledImage}
@@ -86,6 +92,8 @@ function App() {
                 <main className="flex-1 p-4 bg-[#080808] overflow-hidden">
                     <Canvas
                         inputImage={inputImage}
+                        palluImage={palluImage}
+                        blouseImage={blouseImage}
                         outputImage={outputImage}
                         upscaledImage={upscaledImage}
                         loading={loading}
